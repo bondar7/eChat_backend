@@ -1,14 +1,11 @@
 package com.echat_backend
 
-import com.echat_backend.authenticate
 import com.echat_backend.data.data_sources.UserDataSource
 import com.echat_backend.data.models.User
 import com.echat_backend.data.requests.*
 import com.echat_backend.data.responses.AuthResponse
 import com.echat_backend.security.hashing.HashingService
-import com.echat_backend.security.hashing.SHA256HashingService
 import com.echat_backend.security.hashing.SaltedHash
-import com.echat_backend.security.token.JwtTokenService
 import com.echat_backend.security.token.TokenClaim
 import com.echat_backend.security.token.TokenConfig
 import com.echat_backend.security.token.TokenService
@@ -50,7 +47,7 @@ fun Route.signUp(
         val saltedHash = hashingService.generateSaltedHash(request.password)
         val user = User(
             username = request.username,
-            phoneNumber = request.phoneNumber,
+            email = request.email,
             password = saltedHash.hash,
             salt = saltedHash.salt
         )
@@ -108,11 +105,24 @@ fun Route.logIn(
             HttpStatusCode.OK,
             AuthResponse(
                 username = foundUser.username,
-                phoneNumber = foundUser.phoneNumber,
+                email = foundUser.email,
                 bio = foundUser.userBio,
                 token = token
             )
         )
+    }
+}
+
+fun Route.checkUsername(
+    userDataSource: UserDataSource
+) {
+    post("check-username") {
+        val request = call.receiveOrNull<String>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        val response = userDataSource.checkUsername(request)
+        call.respond(HttpStatusCode.OK, response)
     }
 }
 
@@ -125,18 +135,33 @@ fun Route.changeUsername(
             return@post
         }
         userDataSource.changeUsername(request.usernameToFindUser, request.newUsername)
-        call.respond(HttpStatusCode.OK)
+            call.respond(HttpStatusCode.OK)
     }
 }
-fun Route.changePhoneNumber(
+
+fun Route.checkPassword(
     userDataSource: UserDataSource
 ) {
-    post("change-phoneNumber") {
-        val request = call.receiveOrNull<ChangePhoneNumberRequest>() ?: run {
+    post("check-password") {
+        val request = call.receiveOrNull<CheckPasswordRequest>() ?: run {
             call.respond(HttpStatusCode.BadRequest)
             return@post
         }
-        userDataSource.changePhoneNumber(request.usernameToFindUser, request.newPhoneNumber)
+        val response = userDataSource.checkPassword(request.usernameToFindUser, request.password)
+        call.respond(HttpStatusCode.OK, response)
+    }
+}
+
+
+fun Route.changeEmail(
+    userDataSource: UserDataSource
+) {
+    post("change-email") {
+        val request = call.receiveOrNull<ChangeEmailRequest>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        userDataSource.changeEmail(request.usernameToFindUser, request.newEmail)
         call.respond(HttpStatusCode.OK)
     }
 }
@@ -149,6 +174,18 @@ fun Route.changePassword(
             return@post
         }
         userDataSource.changePassword(request.usernameToFindUser, request.newPassword)
+        call.respond(HttpStatusCode.OK)
+    }
+}
+fun Route.changeUserBio(
+    userDataSource: UserDataSource
+) {
+    post("change-user-bio") {
+        val request = call.receiveOrNull<ChangeUserBioRequest>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        userDataSource.changeBio(request.usernameToFindUser, request.newBio)
         call.respond(HttpStatusCode.OK)
     }
 }

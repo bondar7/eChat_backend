@@ -3,7 +3,7 @@ package com.echat_backend.data.requests
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ChangePhoneNumberRequest(
+data class CheckPasswordRequest(
     val usernameToFindUser: String,
-    val newPhoneNumber: String
+    val password: String
 )

@@ -21,9 +21,12 @@ fun Application.configureRouting(
 
         signUp(hashingService, userDataSource)
         logIn(userDataSource, hashingService, tokenService, tokenConfig)
+        checkUsername(userDataSource)
         changeUsername(userDataSource)
-        changePhoneNumber(userDataSource)
+        changeEmail(userDataSource)
         changePassword(userDataSource)
+        checkPassword(userDataSource)
+        changeUserBio(userDataSource)
         authenticate()
         getSecretInfo()
     }

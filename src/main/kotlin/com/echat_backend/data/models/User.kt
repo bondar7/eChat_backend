@@ -5,7 +5,7 @@ import org.bson.types.ObjectId
 
 data class User(
     val username: String,
-    val phoneNumber: String,
+    val email: String,
     val password: String,
     val userBio: String = "Bio",
     val salt: String,
