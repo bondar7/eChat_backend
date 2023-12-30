@@ -1,10 +1,13 @@
 package com.echat_backend.data.data_sources
 
 import com.echat_backend.data.models.User
+import com.echat_backend.data.responses.Person
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SaltedHash
+import com.mongodb.client.model.Filters.regex
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
+import org.litote.kmongo.regex
 
 class MongoUserDataSource(
     db: CoroutineDatabase,
@@ -17,15 +20,56 @@ class MongoUserDataSource(
         return users.insertOne(user).wasAcknowledged()
     }
 
+    override suspend fun changeAvatar(usernameToFindUser: String, avatar: ByteArray) {
+        try {
+            val userToUpdate = getUserByUsername(usernameToFindUser)
+            if (userToUpdate != null) {
+                val updatedUser = userToUpdate.copy(avatar = avatar)
+                users.replaceOne(User::username eq usernameToFindUser, updatedUser)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("EXCEPTION: $e")
+        }
+    }
+
     override suspend fun getUserByUsername(username: String): User? {
         return try {
             users.findOne(User::username eq username)
         } catch (e: Exception) {
             e.printStackTrace()
-            println("EXCEPTION WHILE FINDING USER")
             null
         }
     }
+
+    override suspend fun getUserByEmail(email: String): User? {
+        return try {
+            users.findOne(User::email eq email)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
+    override suspend fun getUsersByUsername(username: String): List<Person> {
+        return try {
+            val regexQuery = "^$username".toRegex(RegexOption.IGNORE_CASE)
+            val users = users.find(User::username.regex(regexQuery)).toList()
+              val persons = users.map {
+                    Person(
+                        it.username,
+                        it.name ?: it.username,
+                        it.avatar,
+                        it.userBio
+                    )
+                }
+                persons
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
 
     override suspend fun changeUsername(usernameToFindUser: String, newUsername: String) {
          try {
@@ -46,6 +90,20 @@ class MongoUserDataSource(
                     // check if update finished okay
                     updateResult.wasAcknowledged()
                 }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    override suspend fun changeName(usernameToFindUser: String, newName: String) {
+        try {
+            val userToUpdate = getUserByUsername(usernameToFindUser)
+
+            if (userToUpdate != null) {
+                val updatedUser = userToUpdate.copy(name = newName)
+                val updateResult = users.replaceOne(User::username eq usernameToFindUser, updatedUser)
+                updateResult.wasAcknowledged()
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -87,11 +145,20 @@ class MongoUserDataSource(
         return try {
             val correctUsername = username.removeSurrounding("\"")
             val user = getUserByUsername(correctUsername)
-            println("USER: $user")
             user == null
         } catch (e: Exception) {
             e.printStackTrace()
-            println("RESPONSE: EXCEPTION")
+            false
+        }
+    }
+
+    override suspend fun checkEmail(email: String): Boolean {
+        return try {
+            val correctEmail = email.removeSurrounding("\"")
+            val user = getUserByEmail(correctEmail)
+            user == null
+        } catch (e: Exception) {
+            e.printStackTrace()
             false
         }
     }
@@ -111,6 +178,7 @@ class MongoUserDataSource(
             false
         }
     }
+
     override suspend fun changeBio(usernameToFindUser: String, newBio: String): Boolean {
         return try {
             val userToUpdate = getUserByUsername(usernameToFindUser)

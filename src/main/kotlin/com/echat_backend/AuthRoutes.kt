@@ -4,6 +4,7 @@ import com.echat_backend.data.data_sources.UserDataSource
 import com.echat_backend.data.models.User
 import com.echat_backend.data.requests.*
 import com.echat_backend.data.responses.AuthResponse
+import com.echat_backend.data.responses.Person
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SaltedHash
 import com.echat_backend.security.token.TokenClaim
@@ -105,11 +106,29 @@ fun Route.logIn(
             HttpStatusCode.OK,
             AuthResponse(
                 username = foundUser.username,
+                name = foundUser.name,
                 email = foundUser.email,
                 bio = foundUser.userBio,
+                avatar = foundUser.avatar,
                 token = token
             )
         )
+    }
+}
+
+fun Route.changeAvatar(
+    userDataSource: UserDataSource
+) {
+    post("change-avatar") {
+        val request = call.receiveOrNull<ChangeAvatarRequest>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        userDataSource.changeAvatar(
+            usernameToFindUser = request.usernameToFindUser,
+            avatar = request.avatar
+        )
+        call.respond(HttpStatusCode.OK)
     }
 }
 
@@ -139,6 +158,19 @@ fun Route.changeUsername(
     }
 }
 
+fun Route.changeName(
+    userDataSource: UserDataSource
+) {
+    post("change-name") {
+        val request = call.receiveOrNull<ChangeNameRequest>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        userDataSource.changeName(request.usernameToFindUser, request.newName)
+        call.respond(HttpStatusCode.OK)
+    }
+}
+
 fun Route.checkPassword(
     userDataSource: UserDataSource
 ) {
@@ -165,6 +197,19 @@ fun Route.changeEmail(
         call.respond(HttpStatusCode.OK)
     }
 }
+fun Route.checkEmail(
+    userDataSource: UserDataSource
+) {
+    post("check-email") {
+        val request = call.receiveOrNull<String>() ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@post
+        }
+        val response = userDataSource.checkEmail(request)
+        call.respond(HttpStatusCode.OK, response)
+    }
+}
+
 fun Route.changePassword(
     userDataSource: UserDataSource
 ) {
@@ -206,5 +251,19 @@ fun Route.getSecretInfo() {
             val userId = principal?.getClaim("userId", String::class)
             call.respond(HttpStatusCode.OK, "Your userId is $userId")
         }
+    }
+}
+
+
+fun Route.getUsersByUsername(
+    userDataSource: UserDataSource
+) {
+    get("get-users-by-username") {
+        val request = call.parameters["username"] ?: run {
+            call.respond(HttpStatusCode.BadRequest)
+            return@get
+        }
+        val response = userDataSource.getUsersByUsername(request)
+        call.respond(HttpStatusCode.OK, response)
     }
 }
