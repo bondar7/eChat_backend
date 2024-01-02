@@ -1,10 +1,9 @@
-package com.echat_backend.data.data_sources
+package com.echat_backend.data.data_sources.userDT
 
 import com.echat_backend.data.models.User
 import com.echat_backend.data.responses.Person
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SaltedHash
-import com.mongodb.client.model.Filters.regex
 import org.litote.kmongo.coroutine.CoroutineDatabase
 import org.litote.kmongo.eq
 import org.litote.kmongo.regex
@@ -42,6 +41,15 @@ class MongoUserDataSource(
         }
     }
 
+    override suspend fun getUserById(id: String): User? {
+        return try {
+            users.findOne(User::id eq id)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
+
     override suspend fun getUserByEmail(email: String): User? {
         return try {
             users.findOne(User::email eq email)
@@ -57,6 +65,7 @@ class MongoUserDataSource(
             val users = users.find(User::username.regex(regexQuery)).toList()
               val persons = users.map {
                     Person(
+                        it.id,
                         it.username,
                         it.name ?: it.username,
                         it.avatar,

@@ -1,10 +1,9 @@
-package com.echat_backend
+package com.echat_backend.routes
 
-import com.echat_backend.data.data_sources.UserDataSource
+import com.echat_backend.data.data_sources.userDT.UserDataSource
 import com.echat_backend.data.models.User
 import com.echat_backend.data.requests.*
 import com.echat_backend.data.responses.AuthResponse
-import com.echat_backend.data.responses.Person
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SaltedHash
 import com.echat_backend.security.token.TokenClaim
@@ -105,6 +104,7 @@ fun Route.logIn(
         call.respond(
             HttpStatusCode.OK,
             AuthResponse(
+                id = foundUser.id,
                 username = foundUser.username,
                 name = foundUser.name,
                 email = foundUser.email,

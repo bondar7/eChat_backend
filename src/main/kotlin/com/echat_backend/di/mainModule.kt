@@ -1,7 +1,12 @@
 package com.echat_backend.di
 
-import com.echat_backend.data.data_sources.MongoUserDataSource
-import com.echat_backend.data.data_sources.UserDataSource
+import com.echat_backend.chat_sessions.SessionManager
+import com.echat_backend.data.data_sources.messageDT.MessageDataSource
+import com.echat_backend.data.data_sources.messageDT.MongoMessageDataSource
+import com.echat_backend.data.data_sources.sessionDT.MongoSessionDataSource
+import com.echat_backend.data.data_sources.sessionDT.SessionDataSource
+import com.echat_backend.data.data_sources.userDT.MongoUserDataSource
+import com.echat_backend.data.data_sources.userDT.UserDataSource
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SHA256HashingService
 import com.echat_backend.security.token.JwtTokenService
@@ -24,6 +29,18 @@ val mainModule = module {
 
     single<UserDataSource> {
         MongoUserDataSource(get(), get())
+    }
+
+    single<SessionDataSource> {
+        MongoSessionDataSource(get())
+    }
+
+    single<MessageDataSource> {
+        MongoMessageDataSource(get())
+    }
+
+    single<SessionManager> {
+        SessionManager(get())
     }
 
     single<TokenService> {

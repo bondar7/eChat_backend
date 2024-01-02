@@ -12,5 +12,5 @@ data class User(
     val userBio: String = "Bio",
     val avatar: ByteArray? = null,
     val salt: String,
-    @BsonId val id: ObjectId = ObjectId()
+    @BsonId val id: String = ObjectId().toString()
 )
