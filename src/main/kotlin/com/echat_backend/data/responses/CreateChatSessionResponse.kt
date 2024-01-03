@@ -1,8 +1,8 @@
-package com.echat_backend.data.requests
+package com.echat_backend.data.responses
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SessionResponse(
+data class CreateChatSessionResponse(
     val sessionId: String
 )

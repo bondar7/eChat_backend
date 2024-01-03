@@ -50,5 +50,9 @@ fun Application.configureRouting(
         )
 
         getMessagesBySessionId(sessionManager)
+
+        getSessionsByUserId(
+            sessionDataSource, userDataSource, messageDataSource
+        )
     }
 }

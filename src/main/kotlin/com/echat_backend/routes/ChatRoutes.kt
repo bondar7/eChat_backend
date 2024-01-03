@@ -98,7 +98,7 @@ private suspend fun handleMessage(
 fun Route.getMessagesBySessionId(
     sessionManager: SessionManager
 ) {
-    get(path = "messages-by-sessionID") {
+    get(path = "get-messages-by-sessionID") {
         val sessionId = call.parameters["sessionId"] ?: run {
             call.respond(HttpStatusCode.BadRequest, emptyList<Message>())
             return@get
