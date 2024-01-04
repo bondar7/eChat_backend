@@ -47,12 +47,28 @@ fun Route.chatSocket(
                                 val message = frame.readText()
                                 println("RECEIVED MESSAGE: $message")
                                 handleMessage(
-                                    sessionId,
-                                    currentUserId,
-                                    currentUsername,
-                                    message,
-                                    messageDataSource,
-                                    sessionManager
+                                    sessionId = sessionId,
+                                    senderUserId = currentUserId,
+                                    senderUsername = currentUsername,
+                                    messageText = message,
+                                    messageImage = null,
+                                    messageDataSource = messageDataSource,
+                                    sessionManager = sessionManager
+                                )
+                            }
+
+                            is Frame.Binary -> {
+                                // Обробка отриманого binary message
+                                val byteArray = frame.readBytes()
+                                println("RECEIVED BYTES: $byteArray")
+                                handleMessage(
+                                    sessionId = sessionId,
+                                    senderUserId = currentUserId,
+                                    senderUsername = currentUsername,
+                                    messageText = null,
+                                    messageImage = byteArray,
+                                    messageDataSource = messageDataSource,
+                                    sessionManager = sessionManager
                                 )
                             }
                             else -> {}
@@ -72,16 +88,18 @@ private suspend fun handleMessage(
     sessionId: String,
     senderUserId: String,
     senderUsername: String,
-    message: String,
+    messageText: String?,
+    messageImage: ByteArray?,
     messageDataSource: MessageDataSource,
     sessionManager: SessionManager
 ) {
     val messageEntity = Message(
-        sessionId,
-        senderUserId,
-        senderUsername,
-        message,
-        System.currentTimeMillis()
+        sessionId = sessionId,
+        senderId = senderUserId,
+        senderUsername = senderUsername,
+        text = messageText,
+        image = messageImage,
+        timestamp = System.currentTimeMillis()
     )
     // Зберегти повідомлення у базі даних, якщо потрібно
     messageDataSource.insertMessage(

@@ -88,7 +88,7 @@ class MongoSessionDataSource(
                     ChatSession(
                         sessionId = it.id,
                         user = person,
-                        lastMessage = lastMessage.content,
+                        lastMessage = lastMessage.text ?: "Image",
                         lastMessageSentTime = lastMessage.timestamp
                     )
                 } else {

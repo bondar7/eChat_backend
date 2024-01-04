@@ -10,7 +10,8 @@ data class Message(
     val sessionId: String,
     val senderId: String,
     val senderUsername: String,
-    val content: String,
+    val text: String?,
+    val image: ByteArray?,
     val timestamp: Long,
     @BsonId val id: String = ObjectId().toString()
 )
