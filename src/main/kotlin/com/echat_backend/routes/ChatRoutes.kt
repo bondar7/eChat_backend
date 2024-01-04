@@ -55,7 +55,6 @@ fun Route.chatSocket(
                                     sessionManager
                                 )
                             }
-
                             else -> {}
                             // Інші типи повідомлень можна обробити аналогічно
                         }
@@ -90,7 +89,6 @@ private suspend fun handleMessage(
     )
 
     val jsonMessage = Json.encodeToString(messageEntity)
-
     // Відправити повідомлення всім учасникам сесії
     sessionManager.broadcastMessage(sessionId, jsonMessage)
 }
