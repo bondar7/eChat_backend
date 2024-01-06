@@ -14,12 +14,6 @@ import com.echat_backend.security.hashing.SHA256HashingService
 import com.echat_backend.security.token.JwtTokenService
 import com.echat_backend.security.token.TokenConfig
 import com.echat_backend.security.token.TokenService
-import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.kotlinx.serializer.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
