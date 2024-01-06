@@ -4,6 +4,7 @@ import com.echat_backend.chat_sessions.SessionManager
 import com.echat_backend.data.data_sources.messageDT.MessageDataSource
 import com.echat_backend.data.data_sources.sessionDT.SessionDataSource
 import com.echat_backend.data.data_sources.userDT.UserDataSource
+import com.echat_backend.data.remote.OneSignalService
 import com.echat_backend.routes.*
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.token.TokenConfig
@@ -22,6 +23,7 @@ fun Application.configureRouting(
         val messageDataSource: MessageDataSource by inject(MessageDataSource::class.java)
         val tokenService: TokenService by inject(TokenService::class.java)
         val tokenConfig: TokenConfig by inject(TokenConfig::class.java)
+        val oneSignalService: OneSignalService by inject(OneSignalService::class.java)
 
         // auth
         signUp(hashingService, userDataSource)
@@ -45,8 +47,10 @@ fun Application.configureRouting(
         // web socket
         chatSocket(
             sessionManager,
+            sessionDataSource,
             messageDataSource,
-            userDataSource
+            userDataSource,
+            oneSignalService,
         )
 
         getMessagesBySessionId(sessionManager)

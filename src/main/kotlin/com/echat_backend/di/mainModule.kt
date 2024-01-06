@@ -7,11 +7,20 @@ import com.echat_backend.data.data_sources.sessionDT.MongoSessionDataSource
 import com.echat_backend.data.data_sources.sessionDT.SessionDataSource
 import com.echat_backend.data.data_sources.userDT.MongoUserDataSource
 import com.echat_backend.data.data_sources.userDT.UserDataSource
+import com.echat_backend.data.remote.OneSignalService
+import com.echat_backend.data.remote.OneSignalServiceImpl
 import com.echat_backend.security.hashing.HashingService
 import com.echat_backend.security.hashing.SHA256HashingService
 import com.echat_backend.security.token.JwtTokenService
 import com.echat_backend.security.token.TokenConfig
 import com.echat_backend.security.token.TokenService
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.kotlinx.serializer.*
+import io.ktor.serialization.kotlinx.json.*
+import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
 import org.koin.dsl.module
 import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
@@ -25,6 +34,16 @@ val mainModule = module {
             connectionString =
             "mongodb+srv://maksimbondar:$mongoPw@cluster0.gjmxfwx.mongodb.net/$mongoDbName?retryWrites=true&w=majority"
         ).coroutine.getDatabase(mongoDbName)
+    }
+
+
+    val client = OkHttpClient()
+
+    single<OneSignalService> {
+        OneSignalServiceImpl(
+            client = client,
+            apiKey = System.getenv("REST_API_KEY")
+        )
     }
 
     single<UserDataSource> {

@@ -1,4 +1,3 @@
-
 val ktor_version: String by project
 val kotlin_version: String by project
 val logback_version: String by project
@@ -47,6 +46,11 @@ dependencies {
 
     implementation("commons-codec:commons-codec:$commons_codec_version")
 
+    implementation("io.ktor:ktor-client-core:$ktor_version")
+    implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-serialization:$ktor_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+
     sshAntTask("org.apache.ant:ant-jsch:1.10.12")
 
     // Koin core features
@@ -56,4 +60,8 @@ dependencies {
     testImplementation("io.insert-koin:koin-test-junit4:$koin_version")
 
     implementation("com.typesafe:config:1.4.1")
+
+
+    // Okhttp
+    implementation("com.squareup.okhttp3:okhttp:4.9.3")
 }

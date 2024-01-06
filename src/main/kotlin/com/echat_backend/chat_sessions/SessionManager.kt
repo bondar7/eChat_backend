@@ -2,9 +2,11 @@ package com.echat_backend.chat_sessions
 
 import com.echat_backend.data.data_sources.messageDT.MessageDataSource
 import com.echat_backend.data.models.Message
+import com.echat_backend.data.remote.OneSignalService
+import com.echat_backend.data.remote.dto.Notification
 
 class SessionManager(
-   private val messageDataSource: MessageDataSource,
+    private val messageDataSource: MessageDataSource,
 ) {
     private val sessions = mutableMapOf<String, MutableList<Connection>>()
 
@@ -26,9 +28,19 @@ class SessionManager(
         sessions[sessionId]?.remove(connection)
     }
 
-   suspend fun broadcastMessage(sessionId: String, message: String) {
+    suspend fun broadcastMessage(
+        sessionId: String,
+        receiverId: String,
+        message: String,
+        notification: Notification,
+        oneSignalService: OneSignalService
+    ) {
         sessions[sessionId]?.forEach {
-                it.send(message)
+            it.send(message)
+        }
+        val connection = sessions[sessionId]?.find { it.userId == receiverId }
+        if (connection == null) {
+            oneSignalService.sendNotification(notification)
         }
     }
 
