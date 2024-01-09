@@ -11,7 +11,7 @@ class MongoMessageDataSource(
     db: CoroutineDatabase
 ): MessageDataSource {
 
-    val messages = db.getCollection<Message>()
+    private val messages = db.getCollection<Message>()
     override suspend fun insertMessage(
         message: Message
     ) {
@@ -31,7 +31,7 @@ class MongoMessageDataSource(
         }
     }
 
-    override suspend fun getLastMessageBySessionId(sessionId: String): Message {
+    override suspend fun getLastMessageBySessionId(sessionId: String): Message? {
         return try {
             val sessionMessages = messages.find(Message::sessionId eq sessionId)
                 .sort(descending(Message::timestamp))
@@ -42,10 +42,8 @@ class MongoMessageDataSource(
                 // Вертаємо останнє повідомлення
                 sessionMessages[0]
             } else {
-                // Якщо список порожній, можна повернути дефолтне значення або обробити відповідним чином
-                // Наприклад, кинути виняток або повернути порожнє повідомлення.
-                // Тут ви можете визначити, як краще вам обробити цю ситуацію.
-                throw NoSuchElementException("No messages found for session with id: $sessionId")
+                // Якщо список порожній, повертаємо null
+                null
             }
         } catch (e: Exception) {
             e.printStackTrace()

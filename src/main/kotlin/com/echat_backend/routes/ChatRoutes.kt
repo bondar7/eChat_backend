@@ -62,6 +62,7 @@ fun Route.chatSocket(
                                     senderUsername = currentUsername,
                                     messageText = message,
                                     messageImage = null,
+                                    messageAudio = null,
                                     messageDataSource = messageDataSource,
                                     sessionManager = sessionManager,
                                     oneSignalService = oneSignalService
@@ -69,22 +70,44 @@ fun Route.chatSocket(
                             }
 
                             is Frame.Binary -> {
-                                // Обробка отриманого binary message
                                 val byteArray = frame.readBytes()
-                                println("RECEIVED BYTES: $byteArray")
-                                handleMessage(
-                                    sessionId = sessionId,
-                                    senderUserId = currentUserId,
-                                    receiverUserId = receiverUserId,
-                                    senderUsername = currentUsername,
-                                    messageText = null,
-                                    messageImage = byteArray,
-                                    messageDataSource = messageDataSource,
-                                    sessionManager = sessionManager,
-                                    oneSignalService = oneSignalService
-                                )
-                            }
+                                val isImage =
+                                    checkIfByteArrayIsImage(byteArray) // Ваша функція для перевірки, чи це зображення
+                                when {
+                                    isImage -> {
+                                        println("RECEIVED IMAGE: $byteArray")
+                                        handleMessage(
+                                            sessionId = sessionId,
+                                            senderUserId = currentUserId,
+                                            receiverUserId = receiverUserId,
+                                            senderUsername = currentUsername,
+                                            messageText = null,
+                                            messageImage = byteArray,
+                                            messageAudio = null, // Додайте поле для зображення в вашу функцію
+                                            messageDataSource = messageDataSource,
+                                            sessionManager = sessionManager,
+                                            oneSignalService = oneSignalService
+                                        )
 
+                                    }
+                                    else -> {
+                                        println("RECEIVED AUDIO: $byteArray")
+                                        handleMessage(
+                                            sessionId = sessionId,
+                                            senderUserId = currentUserId,
+                                            receiverUserId = receiverUserId,
+                                            senderUsername = currentUsername,
+                                            messageText = null,
+                                            messageImage = null,
+                                            messageAudio = byteArray, // Додайте поле для аудіофайлу в вашу функцію
+                                            messageDataSource = messageDataSource,
+                                            sessionManager = sessionManager,
+                                            oneSignalService = oneSignalService
+                                        )
+
+                                    }
+                                }
+                            }
                             else -> {}
                             // Інші типи повідомлень можна обробити аналогічно
                         }
@@ -105,6 +128,7 @@ private suspend fun handleMessage(
     senderUsername: String,
     messageText: String?,
     messageImage: ByteArray?,
+    messageAudio: ByteArray?,
     messageDataSource: MessageDataSource,
     sessionManager: SessionManager,
     oneSignalService: OneSignalService
@@ -115,6 +139,7 @@ private suspend fun handleMessage(
         senderUsername = senderUsername,
         text = messageText,
         image = messageImage,
+        audio = messageAudio,
         timestamp = System.currentTimeMillis()
     )
     // Зберегти повідомлення у базі даних, якщо потрібно
@@ -150,4 +175,18 @@ fun Route.getMessagesBySessionId(
         }
         call.respond(HttpStatusCode.OK, sessionManager.getMessagesBySessionId(sessionId))
     }
+}
+
+private fun checkIfByteArrayIsImage(byteArray: ByteArray): Boolean {
+    // Перевірка сигнатури JPEG
+    val isJPEG = byteArray.size >= 2 && byteArray[0] == 0xFF.toByte() && byteArray[1] == 0xD8.toByte()
+
+    // Перевірка сигнатури PNG
+    val isPNG = byteArray.size >= 8 &&
+            byteArray[0] == 0x89.toByte() && byteArray[1] == 0x50.toByte() &&
+            byteArray[2] == 0x4E.toByte() && byteArray[3] == 0x47.toByte() &&
+            byteArray[4] == 0x0D.toByte() && byteArray[5] == 0x0A.toByte() &&
+            byteArray[6] == 0x1A.toByte() && byteArray[7] == 0x0A.toByte()
+
+    return isJPEG || isPNG
 }

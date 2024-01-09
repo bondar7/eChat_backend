@@ -12,6 +12,7 @@ data class Message(
     val senderUsername: String,
     val text: String?,
     val image: ByteArray?,
+    val audio: ByteArray?,
     val timestamp: Long,
     @BsonId val id: String = ObjectId().toString()
 )

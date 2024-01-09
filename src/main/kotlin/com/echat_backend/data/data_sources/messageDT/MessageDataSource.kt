@@ -9,5 +9,5 @@ interface MessageDataSource {
 
     suspend fun getMessagesBySessionId(sessionId: String): List<Message>
 
-    suspend fun getLastMessageBySessionId(sessionId: String): Message
+    suspend fun getLastMessageBySessionId(sessionId: String): Message?
 }

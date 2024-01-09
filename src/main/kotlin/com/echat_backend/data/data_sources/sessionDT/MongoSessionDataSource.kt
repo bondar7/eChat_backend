@@ -83,13 +83,18 @@ class MongoSessionDataSource(
                         foundSndUserById.userBio
                     )
 
-                    val lastMessage = messageDataSource.getLastMessageBySessionId(it.id)
+                    val lastMessageEntity = messageDataSource.getLastMessageBySessionId(it.id)
+                    val lastMessage =
+                        if (lastMessageEntity?.text != null) lastMessageEntity.text
+                        else if (lastMessageEntity?.image != null) "Image"
+                        else if (lastMessageEntity?.audio != null) "Voice message"
+                        else "No messages yet"
 
                     ChatSession(
                         sessionId = it.id,
                         user = person,
-                        lastMessage = lastMessage.text ?: "Image",
-                        lastMessageSentTime = lastMessage.timestamp
+                        lastMessage = lastMessage,
+                        lastMessageSentTime = lastMessageEntity?.timestamp
                     )
                 } else {
                     null // Return null for cases where the user is not found
