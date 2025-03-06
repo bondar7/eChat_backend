@@ -41,13 +41,6 @@ git clone https://github.com/your-username/eChat-backend.git
 cd eChat-backend
 ```
 
-### Run the Server
-```sh
-./gradlew run
-```
-
-By default, the server runs on **http://localhost:8080**.
-
 &nbsp;
 
 ## 📂 Dependencies
